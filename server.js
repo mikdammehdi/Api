@@ -11,7 +11,7 @@ const openai = new OpenAI({
   apiKey: HF_TOKEN,
 });
 
-async function respond(message, maxTokens = 512, temperature = 0.7, topP = 0.95) {
+async function* respond(message, maxTokens = 512, temperature = 0.7, topP = 0.95) {
   const messages = [message];
   let response = '';
   for await (const message of openai.chat.completions.create({
@@ -31,7 +31,11 @@ async function respond(message, maxTokens = 512, temperature = 0.7, topP = 0.95)
 async function googleSearch(query, numResults = 5) {
   const searchResults = [];
   const g = `give me a google prompt for this : ${query}`;
-  const prompt = respond({ role: 'user', content: g });
+  const prompts = [];
+  for (const prompt of await respond({ role: 'user', content: g })) {
+    prompts.push(prompt);
+  }
+  const prompt = prompts.slice(-1)[0];
   const urls = await google.search(query, numResults);
   for (const url of urls) {
     searchResults.push(url);
@@ -61,7 +65,11 @@ async function run(input) {
   }
   const textsJoined = texts.join(' ');
   const summaryPrompt = `Summarize the following content: ${textsJoined}`;
-  const summary = (await respond({ role: 'user', content: summaryPrompt })).slice(-1)[0];
+  const summaries = [];
+  for (const summary of await respond({ role: 'user', content: summaryPrompt })) {
+    summaries.push(summary);
+  }
+  const summary = summaries.slice(-1)[0];
   return summary;
 }
 
