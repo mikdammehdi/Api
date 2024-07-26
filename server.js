@@ -75,22 +75,18 @@ app.get('/200', (req, res) => {
 
 app.get('/ask', (req, res) => {
   const query = req.query.query;
-  async function generate() {
-    const result = await run(query);
-    yield result;
-  }
-  res.set("Content-Type", "text/plain");
-  generate().next().value.then((result) => res.send(result));
+  run(query).then((result) => {
+    res.set("Content-Type", "text/plain");
+    res.send(result);
+  });
 });
 
 app.post('/asklong', (req, res) => {
   const query = req.body.toString('utf-8');
-  async function generate() {
-    const result = await run(query);
-    yield result;
-  }
-  res.set("Content-Type", "text/plain");
-  generate().next().value.then((result) => res.send(result));
+  run(query).then((result) => {
+    res.set("Content-Type", "text/plain");
+    res.send(result);
+  });
 });
 
 const port = 3000;
